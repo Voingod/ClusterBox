@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2018
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClusterBoxStudent", "ReadExcel\ClusterBoxStudent.csproj", "{8C580E69-7006-466D-A86A-A136F2BFDD4A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniversalWindow", "UniversalWindow\UniversalWindow\UniversalWindow.csproj", "{458748C5-79D8-4BB5-B2ED-E785220BFB33}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClusterVector", "ClusterVector_1.2_Good\ClusterVector\ClusterVector.csproj", "{1FE19B54-371F-4695-AAD7-C54E7D14B2E7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalculateRadius", "ClassLibrary3\ClassLibrary3\CalculateRadius.csproj", "{B051944A-170D-4766-B3DC-9ED30E877B79}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8C580E69-7006-466D-A86A-A136F2BFDD4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C580E69-7006-466D-A86A-A136F2BFDD4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C580E69-7006-466D-A86A-A136F2BFDD4A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8C580E69-7006-466D-A86A-A136F2BFDD4A}.Debug|x86.Build.0 = Debug|Any CPU
+		{8C580E69-7006-466D-A86A-A136F2BFDD4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C580E69-7006-466D-A86A-A136F2BFDD4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C580E69-7006-466D-A86A-A136F2BFDD4A}.Release|x86.ActiveCfg = Release|x86
+		{8C580E69-7006-466D-A86A-A136F2BFDD4A}.Release|x86.Build.0 = Release|x86
+		{458748C5-79D8-4BB5-B2ED-E785220BFB33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{458748C5-79D8-4BB5-B2ED-E785220BFB33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{458748C5-79D8-4BB5-B2ED-E785220BFB33}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{458748C5-79D8-4BB5-B2ED-E785220BFB33}.Debug|x86.Build.0 = Debug|Any CPU
+		{458748C5-79D8-4BB5-B2ED-E785220BFB33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{458748C5-79D8-4BB5-B2ED-E785220BFB33}.Release|Any CPU.Build.0 = Release|Any CPU
+		{458748C5-79D8-4BB5-B2ED-E785220BFB33}.Release|x86.ActiveCfg = Release|Any CPU
+		{458748C5-79D8-4BB5-B2ED-E785220BFB33}.Release|x86.Build.0 = Release|Any CPU
+		{1FE19B54-371F-4695-AAD7-C54E7D14B2E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FE19B54-371F-4695-AAD7-C54E7D14B2E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FE19B54-371F-4695-AAD7-C54E7D14B2E7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1FE19B54-371F-4695-AAD7-C54E7D14B2E7}.Debug|x86.Build.0 = Debug|Any CPU
+		{1FE19B54-371F-4695-AAD7-C54E7D14B2E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FE19B54-371F-4695-AAD7-C54E7D14B2E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FE19B54-371F-4695-AAD7-C54E7D14B2E7}.Release|x86.ActiveCfg = Release|Any CPU
+		{1FE19B54-371F-4695-AAD7-C54E7D14B2E7}.Release|x86.Build.0 = Release|Any CPU
+		{B051944A-170D-4766-B3DC-9ED30E877B79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B051944A-170D-4766-B3DC-9ED30E877B79}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B051944A-170D-4766-B3DC-9ED30E877B79}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B051944A-170D-4766-B3DC-9ED30E877B79}.Debug|x86.Build.0 = Debug|Any CPU
+		{B051944A-170D-4766-B3DC-9ED30E877B79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B051944A-170D-4766-B3DC-9ED30E877B79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B051944A-170D-4766-B3DC-9ED30E877B79}.Release|x86.ActiveCfg = Release|Any CPU
+		{B051944A-170D-4766-B3DC-9ED30E877B79}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A13BB97F-2714-4FF7-8C41-0904D49AA891}
+	EndGlobalSection
+EndGlobal
