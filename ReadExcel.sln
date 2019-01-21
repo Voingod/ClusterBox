@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClusterVector", "ClusterVec
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalculateRadius", "ClassLibrary3\ClassLibrary3\CalculateRadius.csproj", "{B051944A-170D-4766-B3DC-9ED30E877B79}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libExcel", "libExcel\libExcel.csproj", "{E2738824-63AA-4ED5-A499-41ECF41A70C8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,14 @@ Global
 		{B051944A-170D-4766-B3DC-9ED30E877B79}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B051944A-170D-4766-B3DC-9ED30E877B79}.Release|x86.ActiveCfg = Release|Any CPU
 		{B051944A-170D-4766-B3DC-9ED30E877B79}.Release|x86.Build.0 = Release|Any CPU
+		{E2738824-63AA-4ED5-A499-41ECF41A70C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2738824-63AA-4ED5-A499-41ECF41A70C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2738824-63AA-4ED5-A499-41ECF41A70C8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E2738824-63AA-4ED5-A499-41ECF41A70C8}.Debug|x86.Build.0 = Debug|Any CPU
+		{E2738824-63AA-4ED5-A499-41ECF41A70C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2738824-63AA-4ED5-A499-41ECF41A70C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2738824-63AA-4ED5-A499-41ECF41A70C8}.Release|x86.ActiveCfg = Release|Any CPU
+		{E2738824-63AA-4ED5-A499-41ECF41A70C8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
