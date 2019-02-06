@@ -7,6 +7,7 @@ using System.Windows.Forms;
 
 namespace libExcel
 {
+
     class libExcel
     {
         static void Main(string[] args)
@@ -17,23 +18,6 @@ namespace libExcel
             string value="One,Two";
 
             DataTable dt = Select(path,sheet,value);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
             //Для відлагодження
             string dataExcelGlobalFormat = "";
@@ -46,14 +30,26 @@ namespace libExcel
         }
 
         /// <summary>
-        /// Метод для считывания данных с Excel файлов
+        /// Метод для считывания данных с Excel файлов. Принимает три параметра, возвращает один 
+        /// в типе данных DataTable
+        /// path - путь к таблице Excel, 
+        /// sheet - лист в таблице, 
+        /// value - название столбцов
         /// </summary>
         /// <param name="path">Пусть к файлу</param>
         /// <param name="sheet">Лист для чтения</param>
         /// <param name="value">Название столбцов для чтения</param>
         /// <returns></returns>
+        /// <exception cref="System.InvalidOperationException">Thrown when...</exception>
+        /// <exception cref="System.Data.OleDb.OleDbException">Thrown when...</exception>
+        /// <exception cref="System.FormatException">Thrown when...</exception>
+        /// <exception cref="System.IndexOutOfRangeException">Thrown when...</exception>
+        /// 
+
+
         static DataTable Select (string path, string sheet, string value)
         {
+            string [] list = value.Split(new Char[] { ' ', ',', '.', ':', '_' }, StringSplitOptions.RemoveEmptyEntries);
             DataTable dt = new DataTable("Read");
             try
             {
@@ -88,6 +84,7 @@ namespace libExcel
                         int indexsheet = ExcelSheets.IndexOf(sheet);
                         string sheet1 = (string)schemaTable.Rows[indexsheet].ItemArray[2];
                         string select = String.Format("SELECT * FROM [{0}]", sheet1);
+                        bool flag = true;
 
                         OleDbCommand oleDB = new OleDbCommand(select, conn);
                         OleDbDataReader reader = oleDB.ExecuteReader();
@@ -95,15 +92,23 @@ namespace libExcel
                         {
                             ColumnInSheets.Add(reader.GetName(i)); // Имя столбца
                         }
-
-                        if (ColumnInSheets.Contains(value))
+                        int j;
+                        for(j=0; j<list.Length;j++)
+                        {
+                           if(!ColumnInSheets.Contains(list[j]))
+                           {
+                                flag = false;
+                                break;
+                           }
+                        }
+                        if (flag)
                         {
                             OleDbDataAdapter da = new OleDbDataAdapter(" Select " + value + " from[" + sheet + "$]", conn);
                             da.Fill(dt);
                         }
                         else
                         {
-                            MessageBox.Show("Таблиця (лист) " + sheet + " не містить стовпчика (колонки) " + value);
+                            MessageBox.Show("Таблиця (лист) " + sheet + " не містить стовпчика (колонки) " + list[j]);
                         }
                     }
                     else
@@ -119,6 +124,7 @@ namespace libExcel
                     "Перевірте наявність файлу " + path.Remove(0, path.IndexOf('\\') + 1) + ".\n" +
                     "Якщо файл існує, перевірте коректність введеного шляху: " +
                     path.Remove(path.LastIndexOf('\\'), path.Length - path.LastIndexOf('\\')) + "");
+                    
                 }
             }
             catch (InvalidOperationException ex)
@@ -130,19 +136,24 @@ namespace libExcel
                 }
                 else
                 {
-                    MessageBox.Show("Необроблена помилка!!!\n" + ex.Message);
+                    MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message);
                 }
 
             }
             catch (OleDbException ex)
             {
-                MessageBox.Show("Необроблена помилка!!!\n" + ex.Message);
+                MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message);
 
             }
             catch (FormatException ex)
             {
-                MessageBox.Show("Необроблена помилка!!!\n"+ex.Message);
+                MessageBox.Show("Необроблена помилка!!!\n\t"+ex.Message);
             }
+            catch (IndexOutOfRangeException ex)
+            {
+                MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message);
+            }
+
             return dt;
         }
 
