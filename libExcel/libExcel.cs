@@ -18,6 +18,12 @@ namespace libExcel
             string value="One,Two";
 
             DataTable dt = Select(path,sheet,value);
+            List<string> List = ExcelSheet(path);
+           
+            for(int i=0;i<List.Count;i++)
+            {
+                Console.WriteLine(List[i]);
+            }
 
             //Для відлагодження
             string dataExcelGlobalFormat = "";
@@ -45,8 +51,6 @@ namespace libExcel
         /// <exception cref="System.FormatException">Thrown when...</exception>
         /// <exception cref="System.IndexOutOfRangeException">Thrown when...</exception>
         /// 
-
-
         static DataTable Select (string path, string sheet, string value)
         {
             string [] list = value.Split(new Char[] { ' ', ',', '.', ':', '_' }, StringSplitOptions.RemoveEmptyEntries);
@@ -157,7 +161,116 @@ namespace libExcel
             return dt;
         }
 
+        /// <summary>
+        /// Метод для получения списка листов в таблице Excel
+        /// </summary>
+        /// <param name="path">Путь к таблице</param>
+        /// <returns>Возвращает список с содержанием всех листов по указанному пути</returns>
+        static List<string> ExcelSheet (string path)
+        {
+            List<string> ExcelSheets = new List<string>();
+            try
+            {
+                string stringcoon = " Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";" + "Extended Properties='Excel 12.0 Xml;HDR=YES;IMEX=1;'";
+                OleDbConnection conn = new OleDbConnection(stringcoon);
+                OleDbCommand cmd = new OleDbCommand
+                {
+                    Connection = conn
+                };
+                conn.Open();
+                DataTable schemaTable = conn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, new object[] { null, null, null, "TABLE" });
 
+                for (int i = 0; i < schemaTable.Rows.Count; i++)
+                {
+                    string str = Convert.ToString(schemaTable.Rows[i].ItemArray[2]);
+                    string[] charsToRemove = new string[] { "$" };
+                    foreach (string c in charsToRemove)
+                    {
+                        str = str.Replace(c, string.Empty);
+                    }
+                    ExcelSheets.Add(str);
+                }
+                conn.Close();
+            }
+            catch (OleDbException)
+            {
+                MessageBox.Show("Файл " + path.Remove(0, path.IndexOf('\\') + 1) + " не знайдено." +
+                "Перевірте наявність файлу " + path.Remove(0, path.IndexOf('\\') + 1) + ".\n" +
+                "Якщо файл існує, перевірте коректність введеного шляху: " +
+                path.Remove(path.LastIndexOf('\\'), path.Length - path.LastIndexOf('\\')) + "");
+            }
+            catch (InvalidOperationException ex)
+            {
+                if (ex.HResult == -2146233079)
+                {
+                    MessageBox.Show("Необхідно встановити додаток AccessDatabaseEngine. \n" +
+                        "(Для роботи з Excel файлами як файлами бази даних)");
+                }
+                else
+                {
+                    MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message);
+                }
+
+            }
+            return ExcelSheets;
+        }
+
+        /// <summary>
+        /// Метод для считывания всех столбцов из таблицы Excel по заданному пути и с заданного листа. 
+        /// Внутри используется метод для считывания имен листов.
+        /// </summary>
+        /// <param name="path">Путь к таблице Excel</param>
+        /// <param name="sheet">Лист, с которого считываются имена столбцов</param>
+        /// <returns>Возвращает список с именами столбцов</returns>
+        static List <string> ExcelSheetColumn(string path, string sheet)
+        {
+            List<string> ColumnInSheets = new List<string>();
+            try
+            {
+                List<string> List = ExcelSheet(path);
+
+                string stringcoon = " Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";" + "Extended Properties='Excel 12.0 Xml;HDR=YES;IMEX=1;'";
+                OleDbConnection conn = new OleDbConnection(stringcoon);
+                OleDbCommand cmd = new OleDbCommand
+                {
+                    Connection = conn
+                };
+                conn.Open();
+                DataTable schemaTable = conn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, new object[] { null, null, null, "TABLE" });
+               
+                string sheet1 = (string)schemaTable.Rows[List.IndexOf(sheet)].ItemArray[2];
+                string select = String.Format("SELECT * FROM [{0}]", sheet1);
+
+                OleDbCommand oleDB = new OleDbCommand(select, conn);
+                OleDbDataReader reader = oleDB.ExecuteReader();
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    ColumnInSheets.Add(reader.GetName(i)); // Имя столбца
+                }
+                conn.Close();
+            }
+            catch (OleDbException)
+            {
+                MessageBox.Show("Файл " + path.Remove(0, path.IndexOf('\\') + 1) + " не знайдено." +
+                "Перевірте наявність файлу " + path.Remove(0, path.IndexOf('\\') + 1) + ".\n" +
+                "Якщо файл існує, перевірте коректність введеного шляху: " +
+                path.Remove(path.LastIndexOf('\\'), path.Length - path.LastIndexOf('\\')) + "");
+            }
+            catch (InvalidOperationException ex)
+            {
+                if (ex.HResult == -2146233079)
+                {
+                    MessageBox.Show("Необхідно встановити додаток AccessDatabaseEngine. \n" +
+                        "(Для роботи з Excel файлами як файлами бази даних)");
+                }
+                else
+                {
+                    MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message);
+                }
+
+            }
+            return ColumnInSheets;
+        }
     }
 
 }
