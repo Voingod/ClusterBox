@@ -17,21 +17,16 @@ namespace libExcel
             string sheet= "Random";
             string value="One,Two";
 
-            DataTable dt = Select(path,sheet,value);
-            List<string> List = ExcelSheet(path);
-           
-            for(int i=0;i<List.Count;i++)
+            List<string> sheets = new List<string>();
+            sheets = ExcelSheet(path);
+
+            foreach(string test in sheets)
             {
-                Console.WriteLine(List[i]);
+                Console.WriteLine(test);
             }
 
-            //Для відлагодження
-            string dataExcelGlobalFormat = "";
-            for (int i = 0; i < dt.Rows.Count; i++)
-            {
-                dataExcelGlobalFormat = Convert.ToString(dt.Rows[i][0]);
-                Console.WriteLine(dataExcelGlobalFormat);
-            }
+            string abc = "abc";
+            Instert(path, sheet, "name");
             Console.ReadLine();
         }
 
@@ -270,6 +265,34 @@ namespace libExcel
 
             }
             return ColumnInSheets;
+        }
+
+
+        static void Instert(string path, string sheet, string columnName)
+        {
+
+            string stringcoon = " Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";" + "Mode = ReadWrite;" + "Extended Properties='Excel 12.0 Xml;HDR=YES;'";
+            OleDbConnection conn = new OleDbConnection(stringcoon);
+
+            conn.Open();
+            OleDbCommand commInsert = new OleDbCommand("Insert into  [" + sheet + "$](" + columnName + ") VALUES(@name)", conn);
+          //  commInsert.Parameters.AddWithValue("@id", 100);
+            commInsert.Parameters.AddWithValue("@name", "NewName");
+           // commInsert.Parameters.AddWithValue("@age", 100);
+
+            commInsert.ExecuteNonQuery();
+            conn.Close();
+
+            //    OleDbCommand cmd = new OleDbCommand();
+            //    cmd.Connection = conn;
+
+
+            //    string s = "h";
+            //    cmd.CommandText = "INSERT INTO ["+sheet+"$]("+columnName+") VALUES(@name);";
+            //    cmd.Parameters.AddWithValue("@name", "qwe");
+            //    cmd.ExecuteNonQuery();
+
+            //    conn.Close();
         }
     }
 
