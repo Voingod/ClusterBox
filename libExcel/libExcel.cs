@@ -17,16 +17,16 @@ namespace libExcel
             string sheet= "Random";
             string value="One,Two";
 
-            List<string> sheets = new List<string>();
-            sheets = ExcelSheet(path);
+            //List<string> sheets = new List<string>();
+            //sheets = ExcelSheetColumn(path,"Random");
 
-            foreach(string test in sheets)
-            {
-                Console.WriteLine(test);
-            }
+            //foreach(string test in sheets)
+            //{
+            //    Console.WriteLine(test);
+            //}
 
             string abc = "abc";
-            Instert(path, sheet, "name");
+            Instert(path, sheet, "name", "int");
             Console.ReadLine();
         }
 
@@ -268,31 +268,76 @@ namespace libExcel
         }
 
 
-        static void Instert(string path, string sheet, string columnName)
+        static void Instert(string path, string sheet, string columnName, string type)
         {
+            type = "int,int,int";
+            columnName = "One17,One174,One255";
+            string[] list = columnName.Split(new Char[] { ' ', ',', '.', ':', '_' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] types = type.Split(new Char[] { ' ', ',', '.', ':', '_' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] listtypes = new string[list.Length];
+            if (list.Length!=types.Length)
+            {
+                Console.WriteLine("gdfghdfh");
+                return;
+            }
+            for(int i=0;i<list.Length;i++)
+            {
+                listtypes[i] = list[i] +" "+ types[i];
+            }
+            int[] count = new int[list.Length];
+            
+            List<string> sheets = new List<string>();
+            sheets = ExcelSheetColumn(path, "Random");
 
-            string stringcoon = " Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";" + "Mode = ReadWrite;" + "Extended Properties='Excel 12.0 Xml;HDR=YES;'";
-            OleDbConnection conn = new OleDbConnection(stringcoon);
+            for(int i=0;i<list.Length;i++)
+            {
+                count[i] = sheets.IndexOf(list[i]);
+            }
 
-            conn.Open();
-            OleDbCommand commInsert = new OleDbCommand("Insert into  [" + sheet + "$](" + columnName + ") VALUES(@name)", conn);
-          //  commInsert.Parameters.AddWithValue("@id", 100);
-            commInsert.Parameters.AddWithValue("@name", "NewName");
-           // commInsert.Parameters.AddWithValue("@age", 100);
+            string columns = "";
+            for (int i = 0; i < sheets.Count; i++)
+            {
+                columnName = sheets[i];
+                sheets.Remove(sheets[i]);
+                sheets.Add(columnName+" DOUBLE");
 
-            commInsert.ExecuteNonQuery();
-            conn.Close();
+            }
+            for(int i=0;i<count.Length;i++)
+            {
+                sheets.RemoveAt(count[i]);
+                sheets.Insert(count[i], listtypes[i]);
+            }
 
-            //    OleDbCommand cmd = new OleDbCommand();
-            //    cmd.Connection = conn;
+            foreach(string col in sheets)
+            {
+                Console.WriteLine(col);
+            }
+
+            for(int i=0;i<sheets.Count;i++)
+            {
+                columns += sheets[i] == sheets[sheets.Count - 1] ? sheets[i] + ",": sheets[i];
+            }
+          //  Console.WriteLine(columns);
 
 
-            //    string s = "h";
-            //    cmd.CommandText = "INSERT INTO ["+sheet+"$]("+columnName+") VALUES(@name);";
-            //    cmd.Parameters.AddWithValue("@name", "qwe");
-            //    cmd.ExecuteNonQuery();
+            //string stringcoon = " Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";" + "Mode = ReadWrite;" + "Extended Properties='Excel 12.0 Xml;HDR=YES;'";
+            //OleDbConnection conn = new OleDbConnection(stringcoon);
 
-            //    conn.Close();
+            //conn.Open();
+            //OleDbCommand cmd = new OleDbCommand();
+            //cmd.Connection = conn;
+
+            //cmd.CommandText = "CREATE TABLE [Random123$] ("+columns+");";
+            //cmd.ExecuteNonQuery();
+
+            //conn.Close();
+
+            //conn.Open();
+            //cmd.CommandText = "INSERT INTO ["+sheet+"$]("+columnName+") VALUES(3, 'CCCC','2014-01-03');";
+            ////OleDbCommand commInsert = new OleDbCommand("Insert into  [" + sheet + "$](" + columnName + ") VALUES(@name)", conn);
+            ////commInsert.Parameters.AddWithValue("@name", "NewName");
+            //cmd.ExecuteNonQuery();
+            //conn.Close();
         }
     }
 
