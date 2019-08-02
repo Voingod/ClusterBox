@@ -13,20 +13,22 @@ namespace libExcel
         static void Main(string[] args)
         {
             
-            string path= @"D:\ForExcelTest.xlsx";
+            string path= @"D:\ForExcelTest2.xlsx";
             string sheet= "Random";
-            string value="One,Two";
+            string readRow = "One,&,,,,_Two";
 
-            //List<string> sheets = new List<string>();
-            //sheets = ExcelSheetColumn(path,"Random");
+            List<string> sheets = new List<string>();
+            sheets = ExcelSheetColumn(path, "Random");
+
+            Select(path, sheet, readRow);
 
             //foreach(string test in sheets)
             //{
             //    Console.WriteLine(test);
             //}
 
-            string abc = "abc";
-            Instert(path, sheet, "name", "int");
+            //string abc = "abc";
+            //Instert(path, sheet, "name", "int");
             Console.ReadLine();
         }
 
@@ -39,33 +41,34 @@ namespace libExcel
         /// </summary>
         /// <param name="path">Пусть к файлу</param>
         /// <param name="sheet">Лист для чтения</param>
-        /// <param name="value">Название столбцов для чтения</param>
+        /// <param name="readRow">Название столбцов для чтения</param>
         /// <returns></returns>
         /// <exception cref="System.InvalidOperationException">Thrown when...</exception>
         /// <exception cref="System.Data.OleDb.OleDbException">Thrown when...</exception>
         /// <exception cref="System.FormatException">Thrown when...</exception>
         /// <exception cref="System.IndexOutOfRangeException">Thrown when...</exception>
         /// 
-        static DataTable Select (string path, string sheet, string value)
+        static DataTable Select (string path, string sheet, string readRow)
         {
-            string [] list = value.Split(new Char[] { ' ', ',', '.', ':', '_' }, StringSplitOptions.RemoveEmptyEntries);
+            OleDbConnection conn= new OleDbConnection();
+            string [] list = readRow.Split(new char[] { ' ', ',', '.', ':', '_' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach(var abc in list)
+                Console.WriteLine(abc);
             DataTable dt = new DataTable("Read");
             try
             {
                 if (File.Exists(path))
                 {
                     string stringcoon = " Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";" + "Extended Properties='Excel 12.0 Xml;HDR=YES;IMEX=1;'";
-                    OleDbConnection conn = new OleDbConnection(stringcoon);
+                    conn = new OleDbConnection(stringcoon);
                     OleDbCommand cmd = new OleDbCommand();
                     cmd.Connection = conn;
                     conn.Open();
                     DataTable schemaTable = conn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, new object[] { null, null, null, "TABLE" });
 
-
                     // Показать список листов в файле
                     List<string> ExcelSheets = new List<string>();
                     List<string> ColumnInSheets = new List<string>();
-
 
                     for (int i = 0; i < schemaTable.Rows.Count; i++)
                     {
@@ -102,7 +105,7 @@ namespace libExcel
                         }
                         if (flag)
                         {
-                            OleDbDataAdapter da = new OleDbDataAdapter(" Select " + value + " from[" + sheet + "$]", conn);
+                            OleDbDataAdapter da = new OleDbDataAdapter(" Select " + readRow + " from[" + sheet + "$]", conn);
                             da.Fill(dt);
                         }
                         else
@@ -115,7 +118,7 @@ namespace libExcel
                         MessageBox.Show("Файл " + path.Remove(0, path.IndexOf('\\') + 1) +
                             " не містить таблиці (листа) " + sheet);
                     }
-                    conn.Close();
+                    
                 }
                 else
                 {
@@ -152,6 +155,8 @@ namespace libExcel
             {
                 MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message);
             }
+            finally
+            { conn.Close(); }
 
             return dt;
         }
