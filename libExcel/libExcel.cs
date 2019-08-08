@@ -41,19 +41,19 @@ namespace libExcel
         /// </summary>
         /// <param name="path">Пусть к файлу</param>
         /// <param name="sheet">Лист для чтения</param>
-        /// <param name="readRow">Название столбцов для чтения</param>
+        /// <param name="readColumn">Название столбцов для чтения</param>
         /// <returns></returns>
         /// <exception cref="System.InvalidOperationException">Thrown when...</exception>
         /// <exception cref="System.Data.OleDb.OleDbException">Thrown when...</exception>
         /// <exception cref="System.FormatException">Thrown when...</exception>
         /// <exception cref="System.IndexOutOfRangeException">Thrown when...</exception>
         /// 
-        static DataTable Select (string path, string sheet, string readRow)
+        static DataTable Select (string path, string sheet, string readColumn)
         {
             OleDbConnection conn= new OleDbConnection();
-            string [] list = readRow.Split(new char[] { ' ', ',', '.', ':', '_' }, StringSplitOptions.RemoveEmptyEntries);
-            foreach(var abc in list)
-                Console.WriteLine(abc);
+            //Знаки являются разделителями, в итоге получаем массив с именами, которые передаем в метод, разделенные этими знаками
+            string [] list = readColumn.Split(new char[] { ' ', ',', '.', ':', '_' }, StringSplitOptions.RemoveEmptyEntries);
+
             DataTable dt = new DataTable("Read");
             try
             {
@@ -68,16 +68,14 @@ namespace libExcel
 
                     // Показать список листов в файле
                     List<string> ExcelSheets = new List<string>();
+                    //Показать список столбцов в определенном листе
                     List<string> ColumnInSheets = new List<string>();
 
                     for (int i = 0; i < schemaTable.Rows.Count; i++)
                     {
+                        //В переменную записываем название листа в том виде, в котором оно храниться в схеме Excel
                         string str = Convert.ToString(schemaTable.Rows[i].ItemArray[2]);
-                        string[] charsToRemove = new string[] { "$" };
-                        foreach (string c in charsToRemove)
-                        {
-                            str = str.Replace(c, string.Empty);
-                        }
+                            str = str.Replace("$", string.Empty);
                         ExcelSheets.Add(str);
                     }
 
@@ -105,7 +103,7 @@ namespace libExcel
                         }
                         if (flag)
                         {
-                            OleDbDataAdapter da = new OleDbDataAdapter(" Select " + readRow + " from[" + sheet + "$]", conn);
+                            OleDbDataAdapter da = new OleDbDataAdapter(" Select " + readColumn + " from[" + sheet + "$]", conn);
                             da.Fill(dt);
                         }
                         else
@@ -132,31 +130,19 @@ namespace libExcel
             catch (InvalidOperationException ex)
             {
                 if (ex.HResult == -2146233079)
-                {
                     MessageBox.Show("Необхідно встановити додаток AccessDatabaseEngine. \n" +
                         "(Для роботи з Excel файлами як файлами бази даних)");
-                }
                 else
-                {
                     MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message);
-                }
+            }
+            catch (OleDbException ex){MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message);}
+            catch (FormatException ex){MessageBox.Show("Необроблена помилка!!!\n\t"+ex.Message);}
+            catch (IndexOutOfRangeException ex){MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message);}
 
-            }
-            catch (OleDbException ex)
-            {
-                MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message);
-
-            }
-            catch (FormatException ex)
-            {
-                MessageBox.Show("Необроблена помилка!!!\n\t"+ex.Message);
-            }
-            catch (IndexOutOfRangeException ex)
-            {
-                MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message);
-            }
             finally
-            { conn.Close(); }
+            {
+                conn.Close();
+            }
 
             return dt;
         }
@@ -271,7 +257,6 @@ namespace libExcel
             }
             return ColumnInSheets;
         }
-
 
         static void Instert(string path, string sheet, string columnName, string type)
         {
