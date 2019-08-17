@@ -161,6 +161,7 @@ namespace libExcel
                     DataTable schemaTable = conn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, new object[] { null, null, null, "TABLE" });
 
                     List<string> ExcelSheets = new List<string>();
+                    //Показать список столбцов в определенном листе
                     List<string> ColumnInSheets = new List<string>();
 
                     for (int i = 0; i < schemaTable.Rows.Count; i++)
