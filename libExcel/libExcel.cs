@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define SelectWithParametr
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
@@ -16,10 +17,15 @@ namespace libExcel
             string sheet = "Random";
             string value = "One,Two";
 
-            libExcel_Work lib = new libExcel_Work(path);
-            var dt = lib.Select(sheet,value);
+            libExcel_Work lib = new libExcel_Work(path,sheet,value);
+            var a=lib.ExcelSheet();
+            var b = lib.ExcelSheetColumn(a[0]);
+
+            Console.WriteLine();
+            var dt = lib.Select();
             //foreach(var c in dt)
             //    Console.WriteLine(c);
+           // Console.WriteLine(dt.Rows[0][1]);
             Console.ReadLine();
 
         }
@@ -27,26 +33,51 @@ namespace libExcel
     }
     class libExcel_Work
     {
+        readonly string sheet;
+        readonly string column;
+        readonly string path;
+        OleDbConnection conn = new OleDbConnection();
+
         /// <summary>
-        /// Конструктор создает объект и инициализирует его, добавляя введенный путь. Создает строку подключения для всех методов даного класса
+        /// Конструктор создает объект и инициализирует его, добавляя введенный путь.
         /// </summary>
-        /// <param name="path">Путь к таблице</param>
+        /// <param name="path">Путь к файлу Excel</param>
         public libExcel_Work(string path)
         {
             this.path = path;
+            Connection();
 
+        }
+
+        /// <summary>
+        /// Конструктор создает объект и инициализирует его, добавляя введенный путь, название листа Excel и название столбцов
+        /// </summary>
+        /// <param name="path">Путь к файлу Excel</param>
+        /// <param name="sheet">Лист для чтения</param>
+        /// <param name="column">Название столбцов для чтения</param>
+        public libExcel_Work(string path, string sheet, string column)
+        {
+            this.path = path;
+            this.sheet = sheet;
+            this.column = column;
+            Connection();
+
+        }
+
+        /// <summary>
+        ///  Создает строку подключения для всех методов даного класса. Вызывается в конструкторе
+        /// </summary>
+        private void Connection()
+        {
             string stringcoon = " Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";" + "Extended Properties='Excel 12.0 Xml;HDR=YES;IMEX=1;'";
             conn = new OleDbConnection(stringcoon);
             OleDbCommand cmd = new OleDbCommand();
             cmd.Connection = conn;
         }
 
-        readonly string path;
-        readonly OleDbConnection conn = new OleDbConnection();
         /// <summary>
         /// Метод для получения списка листов в таблице Excel
         /// </summary>
-        /// <param name="path">Путь к таблице</param>
         /// <returns>Возвращает список с содержанием всех листов по указанному пути</returns>
         public List<string> ExcelSheet ()
         {
@@ -90,9 +121,7 @@ namespace libExcel
 
         /// <summary>
         /// Метод для считывания всех столбцов из таблицы Excel по заданному пути и с заданного листа. 
-        /// Внутри используется метод для считывания имен листов.
         /// </summary>
-        /// <param name="path">Путь к таблице Excel</param>
         /// <param name="sheet">Лист, с которого считываются имена столбцов</param>
         /// <returns>Возвращает список с именами столбцов</returns>
         public List <string> ExcelSheetColumn(string sheet)
@@ -133,11 +162,8 @@ namespace libExcel
         }
 
         /// <summary>
-        /// Метод для считывания данных с Excel файлов. Принимает три параметра, возвращает один 
-        /// в типе данных DataTable
-        /// path - путь к таблице Excel, 
-        /// sheet - лист в таблице, 
-        /// value - название столбцов
+        /// Обобщеный метод для считывания данных с Excel файлов. Служит в качестве заполнителя для
+        /// методов-оберток, принимающих разные типы данных. 
         /// </summary>
         /// <param name="sheet">Лист для чтения</param>
         /// <param name="readColumn">Название столбцов для чтения</param>
@@ -147,65 +173,16 @@ namespace libExcel
         /// <exception cref="System.FormatException">Thrown when...</exception>
         /// <exception cref="System.IndexOutOfRangeException">Thrown when...</exception>
         /// 
-        public DataTable Select (string sheet, string readColumn)
+        private DataTable Select<T, V>(T sheet, V readColumn)
         {
-            
-            //Знаки являются разделителями, в итоге получаем массив с именами, которые передаем в метод, разделенные этими знаками
-            string[] list = readColumn.Split(new Char[] { ' ', ',', '.', ':', '_' }, StringSplitOptions.RemoveEmptyEntries);
             DataTable dt = new DataTable("Read");
             if (File.Exists(path))
             {
                 try
                 {
                     conn.Open();
-                    DataTable schemaTable = conn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, new object[] { null, null, null, "TABLE" });
-
-                    List<string> ExcelSheets = new List<string>();
-                    //Показать список столбцов в определенном листе
-                    List<string> ColumnInSheets = new List<string>();
-
-                    for (int i = 0; i < schemaTable.Rows.Count; i++)
-                    {
-                        
-                        string str = Convert.ToString(schemaTable.Rows[i].ItemArray[2]);
-                        str = str.Replace("$", string.Empty);
-                        ExcelSheets.Add(str);
-                    }
-
-                    if (ExcelSheets.Contains(sheet))
-                    {
-                        int indexsheet = ExcelSheets.IndexOf(sheet);
-                        string sheet1 = (string)schemaTable.Rows[indexsheet].ItemArray[2];
-                        string select = String.Format("SELECT * FROM [{0}]", sheet1);
-                        bool flag = true;
-
-                        OleDbCommand oleDB = new OleDbCommand(select, conn);
-                        OleDbDataReader reader = oleDB.ExecuteReader();
-                        for (int i = 0; i < reader.FieldCount; i++)
-                        {
-                            ColumnInSheets.Add(reader.GetName(i)); // Имя столбца
-                        }
-                        int j;
-                        for (j = 0; j < list.Length; j++)
-                        {
-                            if (!ColumnInSheets.Contains(list[j]))
-                            {
-                                flag = false;
-                                break;
-                            }
-                        }
-                        if (flag)
-                        {
-                            OleDbDataAdapter da = new OleDbDataAdapter(" Select " + readColumn + " from[" + sheet + "$]", conn);
-                            da.Fill(dt);
-                        }
-                        else
-                            MessageBox.Show("Таблиця (лист) " + sheet + " не містить стовпчика (колонки) " + list[j]);
-                    }
-                    else
-                        MessageBox.Show("Файл " + path.Remove(0, path.IndexOf('\\') + 1) +
-                            " не містить таблиці (листа) " + sheet);
-
+                    OleDbDataAdapter da = new OleDbDataAdapter(" Select " + readColumn + " from[" + sheet + "$]", conn);
+                    da.Fill(dt);
                 }
                 catch (InvalidOperationException ex)
                 {
@@ -213,9 +190,12 @@ namespace libExcel
                         MessageBox.Show("Необхідно встановити додаток AccessDatabaseEngine. \n" +
                             "(Для роботи з Excel файлами як файлами бази даних)");
                     else
-                        MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message);
+                        MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message + ex.StackTrace);
                 }
-                catch (OleDbException ex) { MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message + ex.StackTrace); }
+                catch (OleDbException ex)
+                {
+                    MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message + ex.StackTrace);
+                }
                 catch (FormatException ex) { MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message + ex.StackTrace); }
                 catch (IndexOutOfRangeException ex) { MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message + ex.StackTrace); }
                 finally { conn.Close(); }
@@ -230,60 +210,54 @@ namespace libExcel
             return dt;
         }
 
-        public DataTable Select(string sheet, string readColumn, int zzz=0)
+        /// <summary>
+        /// Метод для считывания данных с Excel файлов. Выбирает из заданной таблицы (листа Excel)
+        /// значения заданных столбцов (названия столбцов на заданном листе Excel). При заполении
+        /// readColumn в качестве строки, запятая "," выступает в качестве разделителя
+        /// Инициализация пути к файлу Excel, происходит в конструкторе
+        /// Первая строка в Excel файле должна выступать в роле названий столбца. 
+        /// </summary>
+        /// <param name="sheet">Лист для чтени</param>
+        /// <param name="readColumn">Название столбцов для чтения</param>
+        /// <returns></returns>
+        public DataTable Select(string sheet, List<string> readColumn)
         {
+            string column="";
+            foreach (string col in readColumn)
+                column += readColumn.Count == readColumn.IndexOf(col) + 1 ? col : col + ",";
 
-            //Знаки являются разделителями, в итоге получаем массив с именами, которые передаем в метод, разделенные этими знаками
-            string[] list = readColumn.Split(new Char[] { ' ', ',', '.', ':', '_' }, StringSplitOptions.RemoveEmptyEntries);
-            DataTable dt = new DataTable("Read");
-            if (File.Exists(path))
-            {
-                try
-                {
-                    List<string> ExcelSheets = ExcelSheet();
-                    List<string> ColumnInSheets = ExcelSheetColumn(sheet);
-
-
-                    if (ExcelSheets.Contains(sheet))
-                    {
-                        conn.Open();
-                        OleDbDataAdapter da = new OleDbDataAdapter(" Select " + readColumn + " from[" + sheet + "$]", conn);
-                        da.Fill(dt);
-
-                        //if (true)
-                        //{
-
-                        //}
-                        //else
-                        //    MessageBox.Show("Таблиця (лист) " + sheet + " не містить стовпчика (колонки) " + list[j]);
-                    }
-                    else
-                        MessageBox.Show("Файл " + path.Remove(0, path.IndexOf('\\') + 1) +
-                            " не містить таблиці (листа) " + sheet);
-
-                }
-                catch (InvalidOperationException ex)
-                {
-                    if (ex.HResult == -2146233079)
-                        MessageBox.Show("Необхідно встановити додаток AccessDatabaseEngine. \n" +
-                            "(Для роботи з Excel файлами як файлами бази даних)");
-                    else
-                        MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message);
-                }
-                catch (OleDbException ex) { MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message + ex.StackTrace); }
-                catch (FormatException ex) { MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message + ex.StackTrace); }
-                catch (IndexOutOfRangeException ex) { MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message + ex.StackTrace); }
-                finally { conn.Close(); }
-            }
-            else
-            {
-                MessageBox.Show("Файл " + path.Remove(0, path.IndexOf('\\') + 1) + " не знайдено." +
-                "Перевірте наявність файлу " + path.Remove(0, path.IndexOf('\\') + 1) + ".\n" +
-                "Якщо файл існує, перевірте коректність введеного шляху: " +
-                path.Remove(path.LastIndexOf('\\'), path.Length - path.LastIndexOf('\\')) + "");
-            }
+            DataTable dt = Select<string,string>(sheet, column);
             return dt;
         }
+
+        /// <summary>
+        /// Метод для считывания данных с Excel файлов. Выбирает из заданной таблицы (листа Excel)
+        /// значения заданных столбцов (названия столбцов на заданном листе Excel).
+        /// Инициализация пути к файлу Excel, происходит в конструкторе
+        /// Первая строка в Excel файле должна выступать в роле названий столбца. 
+        /// </summary>
+        /// <param name="sheet">Лист для чтени</param>
+        /// <param name="readColumn">Название столбцов для чтения</param>
+        /// <returns></returns>
+        public DataTable Select(string sheet, string readColumn)
+        {
+            DataTable dt = Select<string,string>(sheet, readColumn);
+            return dt;
+        }
+
+        /// <summary>
+        /// Метод для считывания данных с Excel файлов. Инициализация пути к файлу Excel, 
+        /// листа для чтения и названия столбцов происходит в конструкторе
+        /// Первая строка в Excel файле должна выступать в роле названий столбца.  
+        /// </summary>
+        /// <returns></returns>
+        public DataTable Select()
+        {
+            DataTable dt = Select<string,string>(sheet, column);
+            return dt;
+        }
+
+
         public void Instert(string sheet, string columnName, string type)
         {
             type = "int,int,int";
