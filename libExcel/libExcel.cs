@@ -1,4 +1,4 @@
-﻿#define SelectWithParametr
+﻿#define InsertOld
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -13,19 +13,14 @@ namespace libExcel
         static void Main(string[] args)
         {
            
-            string path = @"D:\ForExcelTest2.xlsx";
+            string path = @"D:\ForExcelTest.xlsx";
             string sheet = "Random";
-            string value = "One,Two";
+            string column = "One,Two";
 
-            libExcel_Work lib = new libExcel_Work(path,sheet,value);
-            var a=lib.ExcelSheet();
-            var b = lib.ExcelSheetColumn(a[0]);
+            libExcel_Work lib = new libExcel_Work(path,sheet,column);
+            lib.Instert(sheet);
 
-            Console.WriteLine();
-            var dt = lib.Select();
-            //foreach(var c in dt)
-            //    Console.WriteLine(c);
-           // Console.WriteLine(dt.Rows[0][1]);
+
             Console.ReadLine();
 
         }
@@ -176,12 +171,13 @@ namespace libExcel
         private DataTable Select<T, V>(T sheet, V readColumn)
         {
             DataTable dt = new DataTable("Read");
+            OleDbDataAdapter da=null;
             if (File.Exists(path))
             {
                 try
                 {
                     conn.Open();
-                    OleDbDataAdapter da = new OleDbDataAdapter(" Select " + readColumn + " from[" + sheet + "$]", conn);
+                    da = new OleDbDataAdapter(" Select " + readColumn + " from[" + sheet + "$]", conn);
                     da.Fill(dt);
                 }
                 catch (InvalidOperationException ex)
@@ -198,7 +194,7 @@ namespace libExcel
                 }
                 catch (FormatException ex) { MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message + ex.StackTrace); }
                 catch (IndexOutOfRangeException ex) { MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message + ex.StackTrace); }
-                finally { conn.Close(); }
+                finally { conn.Close(); da.Dispose(); }
             }
             else
             {
@@ -257,11 +253,9 @@ namespace libExcel
             return dt;
         }
 
-
-        public void Instert(string sheet, string columnName, string type)
+#if !InsertOld
+        public void Instert(string sheet, string columnName = "One17,One174,One255", string type = "int,int,int")
         {
-            type = "int,int,int";
-            columnName = "One17,One174,One255";
             string[] list = columnName.Split(new Char[] { ' ', ',', '.', ':', '_' }, StringSplitOptions.RemoveEmptyEntries);
             string[] types = type.Split(new Char[] { ' ', ',', '.', ':', '_' }, StringSplitOptions.RemoveEmptyEntries);
             string[] listtypes = new string[list.Length];
@@ -307,7 +301,114 @@ namespace libExcel
             {
                 columns += sheets[i] == sheets[sheets.Count - 1] ? sheets[i] + ",": sheets[i];
             }
-          //  Console.WriteLine(columns);
+            Console.WriteLine(columns);
+
+
+            string stringcoon = " Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";" + "Mode = ReadWrite;" + "Extended Properties='Excel 12.0 Xml;HDR=YES;'";
+            OleDbConnection conn = new OleDbConnection(stringcoon);
+
+            conn.Open();
+            OleDbCommand cmd = new OleDbCommand();
+            cmd.Connection = conn;
+
+            //cmd.CommandText = "CREATE TABLE [Random123$] (" + columns + ");";
+            //cmd.ExecuteNonQuery();
+
+            conn.Close();
+
+            conn.Open();
+            cmd.CommandText = "INSERT INTO [" + sheet + "$](" + columnName + ") VALUES(3, 'CCCC','2014-01-03');";
+            //OleDbCommand commInsert = new OleDbCommand("Insert into  [" + sheet + "$](" + columnName + ") VALUES(@name)", conn);
+            //commInsert.Parameters.AddWithValue("@name", "NewName");
+            cmd.ExecuteNonQuery();
+            conn.Close();
+        }
+#else
+        public void Instert(string sheet, string columnName = "One17,One174,One255", string type = "int,int,int")
+        {
+            if (File.Exists(path))
+            {
+                try
+                {
+                    conn.Open();
+                    OleDbDataAdapter da = new OleDbDataAdapter("Insert into  [" + sheet + "$](" + columnName + ") VALUES(3, 'CCCC','2014-01-03')", conn);
+                    
+                    
+
+                }
+                catch (InvalidOperationException ex)
+                {
+                    if (ex.HResult == -2146233079)
+                        MessageBox.Show("Необхідно встановити додаток AccessDatabaseEngine. \n" +
+                            "(Для роботи з Excel файлами як файлами бази даних)");
+                    else
+                        MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message + ex.StackTrace);
+                }
+                catch (OleDbException ex)
+                {
+                    MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message + ex.StackTrace);
+                }
+                catch (FormatException ex) { MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message + ex.StackTrace); }
+                catch (IndexOutOfRangeException ex) { MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message + ex.StackTrace); }
+                finally { conn.Close(); }
+            }
+            else
+            {
+                MessageBox.Show("Файл " + path.Remove(0, path.IndexOf('\\') + 1) + " не знайдено." +
+                "Перевірте наявність файлу " + path.Remove(0, path.IndexOf('\\') + 1) + ".\n" +
+                "Якщо файл існує, перевірте коректність введеного шляху: " +
+                path.Remove(path.LastIndexOf('\\'), path.Length - path.LastIndexOf('\\')) + "");
+            }
+
+
+
+
+            //string[] list = columnName.Split(new Char[] { ' ', ',', '.', ':', '_' }, StringSplitOptions.RemoveEmptyEntries);
+            //string[] types = type.Split(new Char[] { ' ', ',', '.', ':', '_' }, StringSplitOptions.RemoveEmptyEntries);
+            //string[] listtypes = new string[list.Length];
+            //if (list.Length != types.Length)
+            //{
+            //    Console.WriteLine("gdfghdfh");
+            //    return;
+            //}
+            //for (int i = 0; i < list.Length; i++)
+            //{
+            //    listtypes[i] = list[i] + " " + types[i];
+            //}
+            //int[] count = new int[list.Length];
+
+            //List<string> sheets = new List<string>();
+            //sheets = ExcelSheetColumn("Random");
+
+            //for (int i = 0; i < list.Length; i++)
+            //{
+            //    count[i] = sheets.IndexOf(list[i]);
+            //}
+
+            //string columns = "";
+            //for (int i = 0; i < sheets.Count; i++)
+            //{
+            //    columnName = sheets[i];
+            //    sheets.Remove(sheets[i]);
+            //    sheets.Add(columnName + " DOUBLE");
+
+            //}
+            //for (int i = 0; i < count.Length; i++)
+            //{
+            //    sheets.RemoveAt(count[i]);
+            //    sheets.Insert(count[i], listtypes[i]);
+            //}
+
+            //foreach (string col in sheets)
+            //{
+            //    Console.WriteLine(col);
+            //}
+
+            //for (int i = 0; i < sheets.Count; i++)
+            //{
+            //    columns += sheets[i] == sheets[sheets.Count - 1] ? sheets[i] + "," : sheets[i];
+            //}
+            //Console.WriteLine(columns);
 
 
             //string stringcoon = " Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";" + "Mode = ReadWrite;" + "Extended Properties='Excel 12.0 Xml;HDR=YES;'";
@@ -317,18 +418,20 @@ namespace libExcel
             //OleDbCommand cmd = new OleDbCommand();
             //cmd.Connection = conn;
 
-            //cmd.CommandText = "CREATE TABLE [Random123$] ("+columns+");";
+            //cmd.CommandText = "CREATE TABLE [Random123$] (" + columns + ");";
             //cmd.ExecuteNonQuery();
 
             //conn.Close();
 
             //conn.Open();
-            //cmd.CommandText = "INSERT INTO ["+sheet+"$]("+columnName+") VALUES(3, 'CCCC','2014-01-03');";
+            //cmd.CommandText = "INSERT INTO [" + sheet + "$](" + columnName + ") VALUES(3, 'CCCC','2014-01-03');";
             ////OleDbCommand commInsert = new OleDbCommand("Insert into  [" + sheet + "$](" + columnName + ") VALUES(@name)", conn);
             ////commInsert.Parameters.AddWithValue("@name", "NewName");
             //cmd.ExecuteNonQuery();
             //conn.Close();
         }
+
+#endif
     }
 
 }
