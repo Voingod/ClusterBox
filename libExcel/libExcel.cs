@@ -13,12 +13,11 @@ namespace libExcel
         static void Main(string[] args)
         {
            
-            string path = @"D:\ForExcelTest.xlsx";
+            string path = @"D:\ForExcelTest2.xlsx";
             string sheet = "Random";
-            string column = "One,Two";
+            string column = "One 123,Two";
 
-            libExcel_Work lib = new libExcel_Work(path,sheet,column);
-            lib.Instert(sheet);
+            libExcel_Work lib = new libExcel_Work(path);
 
 
             Console.ReadLine();
@@ -29,8 +28,8 @@ namespace libExcel
     class libExcel_Work
     {
         readonly string sheet;
-        readonly string column;
         readonly string path;
+        string column;
         OleDbConnection conn = new OleDbConnection();
 
         /// <summary>
@@ -56,7 +55,6 @@ namespace libExcel
             this.sheet = sheet;
             this.column = column;
             Connection();
-
         }
 
         /// <summary>
@@ -177,7 +175,7 @@ namespace libExcel
                 try
                 {
                     conn.Open();
-                    da = new OleDbDataAdapter(" Select " + readColumn + " from[" + sheet + "$]", conn);
+                    da = new OleDbDataAdapter(" Select "+readColumn+" from[" + sheet + "$]", conn);
                     da.Fill(dt);
                 }
                 catch (InvalidOperationException ex)
@@ -218,9 +216,10 @@ namespace libExcel
         /// <returns></returns>
         public DataTable Select(string sheet, List<string> readColumn)
         {
-            string column="";
+            string column = "[";
             foreach (string col in readColumn)
-                column += readColumn.Count == readColumn.IndexOf(col) + 1 ? col : col + ",";
+                column += readColumn.Count == readColumn.IndexOf(col) + 1 ? col : col + "],[";
+            column += "]";
 
             DataTable dt = Select<string,string>(sheet, column);
             return dt;
@@ -237,6 +236,7 @@ namespace libExcel
         /// <returns></returns>
         public DataTable Select(string sheet, string readColumn)
         {
+            readColumn = "["+readColumn.Replace(",", "],[")+"]";
             DataTable dt = Select<string,string>(sheet, readColumn);
             return dt;
         }
@@ -249,6 +249,7 @@ namespace libExcel
         /// <returns></returns>
         public DataTable Select()
         {
+            column = "[" + column.Replace(",", "],[") + "]";
             DataTable dt = Select<string,string>(sheet, column);
             return dt;
         }
