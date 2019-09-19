@@ -14,11 +14,16 @@ namespace libExcel
         {
            
             string path = @"D:\ForExcelTest2.xlsx";
+            string longpath = @"D:\Projects\ClusterBox\libExcel\ForExcelTest2.xlsx";
             string sheet = "Random";
             string column = "One 123,Two";
 
-            libExcel_Work lib = new libExcel_Work(path);
+            libExcel_Work lib = new libExcel_Work(longpath);
+           //var abc = lib.Select(sheet,column);
 
+           // foreach(var s in abc.Rows[0].ItemArray)
+           //     Console.WriteLine(s);
+            lib.Instert(sheet, column,3);
 
             Console.ReadLine();
 
@@ -62,7 +67,7 @@ namespace libExcel
         /// </summary>
         private void Connection()
         {
-            string stringcoon = " Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";" + "Extended Properties='Excel 12.0 Xml;HDR=YES;IMEX=1;'";
+            string stringcoon = " Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";" + "Mode = ReadWrite; " + " Extended Properties='Excel 12.0 Xml;HDR=YES;'";
             conn = new OleDbConnection(stringcoon);
             OleDbCommand cmd = new OleDbCommand();
             cmd.Connection = conn;
@@ -325,16 +330,25 @@ namespace libExcel
             conn.Close();
         }
 #else
-        public void Instert(string sheet, string columnName = "One17,One174,One255", string type = "int,int,int")
+        public void Instert<T>(string sheet, string columnName, T insertValue)
         {
             if (File.Exists(path))
             {
                 try
                 {
+                    string insertComandPart = "[@" + columnName.Replace(",", "],[@") + "]";
+                    columnName = "[" + columnName.Replace(",", "],[") + "]";
+                    string[] insertComandPartList = insertComandPart.Split(new [] {','}, StringSplitOptions.RemoveEmptyEntries);
+
                     conn.Open();
-                    OleDbDataAdapter da = new OleDbDataAdapter("Insert into  [" + sheet + "$](" + columnName + ") VALUES(3, 'CCCC','2014-01-03')", conn);
-                    
-                    
+                    string str = "INSERT INTO ["+sheet+"$]("+ columnName + ") VALUES("+insertComandPart+");";
+                    OleDbCommand com = new OleDbCommand(str, conn);
+
+                    for(int i=0;i<insertComandPartList.Length;i++)
+                    {
+                        com.Parameters.AddWithValue(insertComandPartList[i], insertValue);
+                    }
+                    com.ExecuteNonQuery();
 
                 }
                 catch (InvalidOperationException ex)
@@ -345,10 +359,7 @@ namespace libExcel
                     else
                         MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message + ex.StackTrace);
                 }
-                catch (OleDbException ex)
-                {
-                    MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message + ex.StackTrace);
-                }
+                catch (OleDbException ex){MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message + ex.StackTrace);}
                 catch (FormatException ex) { MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message + ex.StackTrace); }
                 catch (IndexOutOfRangeException ex) { MessageBox.Show("Необроблена помилка!!!\n\t" + ex.Message + ex.StackTrace); }
                 finally { conn.Close(); }
