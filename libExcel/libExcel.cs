@@ -23,7 +23,7 @@ namespace libExcel
 
            // foreach(var s in abc.Rows[0].ItemArray)
            //     Console.WriteLine(s);
-            lib.Instert(sheet, column,3);
+            lib.Instert(sheet, column,3,4);
 
             Console.ReadLine();
 
@@ -330,26 +330,31 @@ namespace libExcel
             conn.Close();
         }
 #else
-        public void Instert<T>(string sheet, string columnName, T insertValue)
+        public void Instert(string sheet, string columnName, params object [] insertValue)
         {
             if (File.Exists(path))
             {
                 try
                 {
                     string insertComandPart = "[@" + columnName.Replace(",", "],[@") + "]";
+                    string[] insertComandPartList = insertComandPart.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                     columnName = "[" + columnName.Replace(",", "],[") + "]";
-                    string[] insertComandPartList = insertComandPart.Split(new [] {','}, StringSplitOptions.RemoveEmptyEntries);
-
-                    conn.Open();
-                    string str = "INSERT INTO ["+sheet+"$]("+ columnName + ") VALUES("+insertComandPart+");";
-                    OleDbCommand com = new OleDbCommand(str, conn);
-
-                    for(int i=0;i<insertComandPartList.Length;i++)
+                    if(insertValue.Length< insertComandPartList.Length)
                     {
-                        com.Parameters.AddWithValue(insertComandPartList[i], insertValue);
+                        Console.WriteLine("err");
                     }
-                    com.ExecuteNonQuery();
+                    else
+                    {
+                        conn.Open();
+                        string str = "INSERT INTO [" + sheet + "$](" + columnName + ") VALUES(" + insertComandPart + ");";
+                        OleDbCommand com = new OleDbCommand(str, conn);
 
+                        for (int i = 0; i < insertComandPartList.Length; i++)
+                        {
+                            com.Parameters.AddWithValue(insertComandPartList[i], insertValue[i]);
+                        }
+                        com.ExecuteNonQuery();
+                    }
                 }
                 catch (InvalidOperationException ex)
                 {
@@ -372,75 +377,6 @@ namespace libExcel
                 path.Remove(path.LastIndexOf('\\'), path.Length - path.LastIndexOf('\\')) + "");
             }
 
-
-
-
-            //string[] list = columnName.Split(new Char[] { ' ', ',', '.', ':', '_' }, StringSplitOptions.RemoveEmptyEntries);
-            //string[] types = type.Split(new Char[] { ' ', ',', '.', ':', '_' }, StringSplitOptions.RemoveEmptyEntries);
-            //string[] listtypes = new string[list.Length];
-            //if (list.Length != types.Length)
-            //{
-            //    Console.WriteLine("gdfghdfh");
-            //    return;
-            //}
-            //for (int i = 0; i < list.Length; i++)
-            //{
-            //    listtypes[i] = list[i] + " " + types[i];
-            //}
-            //int[] count = new int[list.Length];
-
-            //List<string> sheets = new List<string>();
-            //sheets = ExcelSheetColumn("Random");
-
-            //for (int i = 0; i < list.Length; i++)
-            //{
-            //    count[i] = sheets.IndexOf(list[i]);
-            //}
-
-            //string columns = "";
-            //for (int i = 0; i < sheets.Count; i++)
-            //{
-            //    columnName = sheets[i];
-            //    sheets.Remove(sheets[i]);
-            //    sheets.Add(columnName + " DOUBLE");
-
-            //}
-            //for (int i = 0; i < count.Length; i++)
-            //{
-            //    sheets.RemoveAt(count[i]);
-            //    sheets.Insert(count[i], listtypes[i]);
-            //}
-
-            //foreach (string col in sheets)
-            //{
-            //    Console.WriteLine(col);
-            //}
-
-            //for (int i = 0; i < sheets.Count; i++)
-            //{
-            //    columns += sheets[i] == sheets[sheets.Count - 1] ? sheets[i] + "," : sheets[i];
-            //}
-            //Console.WriteLine(columns);
-
-
-            //string stringcoon = " Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path + ";" + "Mode = ReadWrite;" + "Extended Properties='Excel 12.0 Xml;HDR=YES;'";
-            //OleDbConnection conn = new OleDbConnection(stringcoon);
-
-            //conn.Open();
-            //OleDbCommand cmd = new OleDbCommand();
-            //cmd.Connection = conn;
-
-            //cmd.CommandText = "CREATE TABLE [Random123$] (" + columns + ");";
-            //cmd.ExecuteNonQuery();
-
-            //conn.Close();
-
-            //conn.Open();
-            //cmd.CommandText = "INSERT INTO [" + sheet + "$](" + columnName + ") VALUES(3, 'CCCC','2014-01-03');";
-            ////OleDbCommand commInsert = new OleDbCommand("Insert into  [" + sheet + "$](" + columnName + ") VALUES(@name)", conn);
-            ////commInsert.Parameters.AddWithValue("@name", "NewName");
-            //cmd.ExecuteNonQuery();
-            //conn.Close();
         }
 
 #endif
